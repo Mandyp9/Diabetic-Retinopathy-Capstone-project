@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result</title>
+</head>
+<body>
+    <h2>Diabetic Retinopathy Prediction</h2>
+    
+    <p><strong>Severity Level:</strong> {{ label }}</p>
+    <p><strong>Severity Rank:</strong> {{ rank }}</p>
+    <p><strong>Confidence Score:</strong> {{ confidence }}</p>
+    <p><strong>Explanation:</strong> {{ explanation }}</p>
+    
+    <h3>Uploaded Image:</h3>
+    <img src="{{ url_for('static', filename=image) }}" alt="Uploaded Image" width="300">
+    
+    <br><br>
+    <a href="/">Upload Another Image</a>
+</body>
+</html>

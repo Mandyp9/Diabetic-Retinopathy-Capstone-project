@@ -6,15 +6,20 @@
     <title>Prediction Result</title>
 </head>
 <body>
-    <h2>Diabetic Retinopathy Prediction</h2>
-    
-    <p><strong>Severity Level:</strong> {{ label }}</p>
-    <p><strong>Severity Rank:</strong> {{ rank }}</p>
-    <p><strong>Confidence Score:</strong> {{ confidence }}</p>
-    <p><strong>Explanation:</strong> {{ explanation }}</p>
-    
-    <h3>Uploaded Image:</h3>
-    <img src="{{ url_for('static', filename=image) }}" alt="Uploaded Image" width="300">
+    <h2>Model A Prediction</h2>
+<p><strong>Label:</strong> {{ result_a.label }}</p>
+<p><strong>Rank:</strong> {{ result_a.rank }}</p>
+<p><strong>Confidence:</strong> {{ result_a.confidence }}</p>
+<p><strong>Explanation:</strong> {{ result_a.explanation }}</p>
+
+<h2>Model B Prediction</h2>
+<p><strong>Label:</strong> {{ result_b.label }}</p>
+<p><strong>Rank:</strong> {{ result_b.rank }}</p>
+<p><strong>Confidence:</strong> {{ result_b.confidence }}</p>
+<p><strong>Explanation:</strong> {{ result_b.explanation }}</p>
+
+<img src="{{ url_for('static', filename=image) }}" width="400">
+
     
     <br><br>
     <a href="/">Upload Another Image</a>

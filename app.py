@@ -6,11 +6,14 @@ import os
 
 app = Flask(__name__)
 
-# Load trained model
-MODEL_PATH = "G:/DR DETECTION APP CAPSTONE/models/more_trained_efficientnet_model.h5"  # Ensure this path is correct
-model = tf.keras.models.load_model(MODEL_PATH)
+# --- Load trained models ---
+MODEL_A_PATH = "G:/DR DETECTION APP CAPSTONE/models/more_trained_efficientnet_model.h5"
+MODEL_B_PATH = "G:/DR DETECTION APP CAPSTONE/models/trained_efficientnet_model.h5"  # Replace with actual model B path
 
-# Define labels for severity levels
+model_a = tf.keras.models.load_model(MODEL_A_PATH)
+model_b = tf.keras.models.load_model(MODEL_B_PATH)
+
+# --- Define labels for severity levels ---
 labels = {
     0: "No DR",
     1: "Mild DR",
@@ -19,16 +22,16 @@ labels = {
     4: "Proliferative DR"
 }
 
-# Severity descriptions
+# --- Severity descriptions ---
 severity_descriptions = {
     0: "No signs of diabetic retinopathy detected.",
-    1: "Early-stage signs such as small microaneurysms.",
-    2: "More blood vessel damage, possible hemorrhages.",
-    3: "Large hemorrhages, increased risk of vision loss.",
-    4: "Abnormal blood vessel growth, highest risk of blindness."
+    1: "Mild DR: Early-stage signs such as small microaneurysms.",
+    2: "Moderate DR: More blood vessel damage, possible hemorrhages.",
+    3: "Severe DR: Large hemorrhages, increased risk of vision loss.",
+    4: "Proliferative DR: Abnormal blood vessel growth, highest risk of blindness."
 }
 
-# Image preprocessing function
+# --- Image preprocessing function ---
 def preprocess_image(image_path):
     """ Load and preprocess the image for model prediction """
     image = Image.open(image_path).convert("RGB")
@@ -37,6 +40,7 @@ def preprocess_image(image_path):
     image = np.expand_dims(image, axis=0)  # Add batch dimension
     return image
 
+# --- Routes ---
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -53,22 +57,38 @@ def predict():
     file_path = os.path.join("static", file.filename)
     file.save(file_path)
     
-    # Preprocess and predict
+    # Preprocess image
     image = preprocess_image(file_path)
-    predictions = model.predict(image)[0]  # Get first prediction in batch
-    predicted_class = np.argmax(predictions)  # Get class with highest probability
-    confidence = predictions[predicted_class] * 100  # Convert to percentage
 
-    severity_label = labels[predicted_class]  # Map class to label
-    severity_rank = predicted_class  # Rank (0-4)
-    explanation = severity_descriptions[predicted_class]  # Get severity explanation
+    # --- Model A prediction ---
+    predictions_a = model_a.predict(image)[0]
+    class_a = np.argmax(predictions_a)
+    confidence_a = predictions_a[class_a] * 100
 
-    return render_template('result.html', 
-                           label=severity_label, 
-                           rank=severity_rank, 
-                           confidence=f"{confidence:.2f}%", 
-                           explanation=explanation, 
-                           image=file.filename)
+    # --- Model B prediction ---
+    predictions_b = model_b.predict(image)[0]
+    class_b = np.argmax(predictions_b)
+    confidence_b = predictions_b[class_b] * 100
+
+    # --- Prepare result for both models ---
+    result_a = {
+        'label': labels[class_a],
+        'rank': class_a,
+        'confidence': f"{confidence_a:.2f}%",
+        'explanation': severity_descriptions[class_a]
+    }
+
+    result_b = {
+        'label': labels[class_b],
+        'rank': class_b,
+        'confidence': f"{confidence_b:.2f}%",
+        'explanation': severity_descriptions[class_b]
+    }
+
+    return render_template('result.html',
+                           image=file.filename,
+                           result_a=result_a,
+                           result_b=result_b)
 
 if __name__ == '__main__':
     app.run(debug=True)
